@@ -71,7 +71,8 @@ function search {
     done
     awk_prg+="1 { n++ } END { if (n) { print \"yes\" }; }"
 
-    for f in "$(find . -type f -name "*.pdf")"; do
+    find . -type f -name '*.pdf' -print0 |
+    while IFS= read -r -d '' f; do
         n=$(awk "${awk_prg}" "${f}")
         if [ "$n" == "yes" ]; then
             echo "${f}"
