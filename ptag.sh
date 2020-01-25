@@ -64,20 +64,33 @@ function untag {
     fi
 }
 
+function search_file {
+    f="$1"
+    awk_prg="$2"
+    n_tags="$3"
+
+    n=$(awk "${awk_prg}" "${f}")
+    if [ "$n" == "${n_tags}" ]; then
+        printf "${f}\n"
+    fi
+}
+
 function search {
     awk_prg=""
-    for tag in $@; do
-        awk_prg+="/${tag}/ && "
+    for tag in "$@"; do
+        awk_prg+="/!!!PTAG ${tag}/ || "
     done
-    awk_prg+="1 { n++ } END { if (n) { print \"yes\" }; }"
 
-    find . -type f -name '*.pdf' -print0 |
-    while IFS= read -r -d '' f; do
-        n=$(awk "${awk_prg}" "${f}")
-        if [ "$n" == "yes" ]; then
-            echo "${f}"
-        fi
-    done
+    awk_prg+="0 { n++ } END { print n; }"
+
+    xargs_template="f=\"\$1\"
+n=\$(awk '${awk_prg}' \"\${f}\")
+if [ \"\$n\" == \"$#\" ]; then
+    echo \"\${f}\"
+fi"
+    echo "${xargs_template}" > /tmp/ptag_script.sh
+
+    find . -type f -name '*.pdf' -print0 | xargs -0 -P8 -I {} bash /tmp/ptag_script.sh {}
 }
 
 function list {
