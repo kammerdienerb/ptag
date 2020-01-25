@@ -6,29 +6,29 @@ function err {
 }
 
 function file_has_tag {
-    f=$1
-    t=$2
+    f="$1"
+    t="$2"
 
     grep -- "!!!PTAG ${t}" "${f}"  2>&1 > /dev/null
 }
 
 function tag_file {
-    f=$1
-    t=$2
+    f="$1"
+    t="$2"
 
     echo "!!!PTAG ${t}" >> "${f}"
 }
 
 function untag_file {
-    f=$1
-    t=$2
+    f="$1"
+    t="$2"
 
     sed -i "/!!!PTAG ${t}/d" "${f}"
 }
 
 function tag {
-    f=$1
-    t=$2
+    f="$1"
+    t="$2"
 
     if ! [ -f "${f}" ]; then
         err "no such file: '${f}'"
@@ -46,8 +46,8 @@ function tag {
 }
 
 function untag {
-    f=$1
-    t=$2
+    f="$1"
+    t="$2"
 
     if ! [ -f "${f}" ]; then
         err "no such file: '${f}'"
@@ -71,7 +71,7 @@ function search {
     done
     awk_prg+="1 { n++ } END { if (n) { print \"yes\" }; }"
 
-    for f in $(find . -type f -name "*.pdf"); do
+    for f in "$(find . -type f -name "*.pdf")"; do
         n=$(awk "${awk_prg}" "${f}")
         if [ "$n" == "yes" ]; then
             echo "${f}"
@@ -80,7 +80,7 @@ function search {
 }
 
 function list {
-    f=$1
+    f="$1"
 
     if ! [ -f "${f}" ]; then
         err "no such file: '${f}'"
@@ -114,23 +114,23 @@ shift
 
 case ${cmd} in
     "tag")
-        tag $@
+        tag "$@"
         ;;
 
     "untag")
-        untag $@
+        untag "$@"
         ;;
 
     "search")
-        search $@
+        search "$@"
         ;;
 
     "list")
-        list $@
+        list "$@"
         ;;
 
     "help")
-        help $@
+        help
         ;;
 
     *)
