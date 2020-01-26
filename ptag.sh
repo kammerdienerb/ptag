@@ -9,7 +9,7 @@ function file_has_tag {
     f="$1"
     t="$2"
 
-    grep -- "!!!PTAG ${t}" "${f}"  2>&1 > /dev/null
+    tail -n 250 "${f}" | grep -- "!!!PTAG ${t}" 2>&1 > /dev/null
 }
 
 function tag_file {
@@ -84,7 +84,7 @@ function search {
     awk_prg+="0 { n++ } END { print n; }"
 
     xargs_template="f=\"\$1\"
-n=\$(awk '${awk_prg}' \"\${f}\")
+n=\$(tail -n 250 \"\${f}\" | awk '${awk_prg}')
 if [ \"\$n\" == \"$#\" ]; then
     echo \"\${f}\"
 fi"
@@ -100,7 +100,7 @@ function list {
         err "no such file: '${f}'"
     fi
 
-    grep -a "!!!PTAG" "${f}" | awk '{ print $2; }'
+    tail -n 250 "${f}" | grep -a "!!!PTAG" | awk '{ print $2; }'
 }
 
 function usage {
