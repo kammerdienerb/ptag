@@ -9,7 +9,7 @@ function file_has_tag {
     f="$1"
     t="$2"
 
-    tail -n 250 "${f}" | grep -- "!!!PTAG ${t}" 2>&1 > /dev/null
+    tail -n 250 "${f}" | grep -E -- "!!!PTAG ${t}\$" 2>&1 > /dev/null
 }
 
 function tag_file {
@@ -23,7 +23,7 @@ function untag_file {
     f="$1"
     t="$2"
 
-    sed -i "/!!!PTAG ${t}/d" "${f}"
+    sed -i "/!!!PTAG ${t}\$/d" "${f}"
 }
 
 function tag {
@@ -78,7 +78,7 @@ function search_file {
 function search {
     awk_prg=""
     for tag in "$@"; do
-        awk_prg+="/!!!PTAG ${tag}/ || "
+        awk_prg+="/!!!PTAG ${tag}\$/ || "
     done
 
     awk_prg+="0 { n++ } END { print n; }"
@@ -96,11 +96,15 @@ fi"
 function list {
     f="$1"
 
-    if ! [ -f "${f}" ]; then
-        err "no such file: '${f}'"
-    fi
+    if [ "x${1}x" == "xx" ]; then
+        find . -type f -name "*.pdf" -print0 | xargs -0 -P8 -I {} bash -c "tail -n 250 \"{}\" | grep -a \"!!!PTAG\" | cut -d\" \" -f 2-" | sort -u
+    else
+        if ! [ -f "${f}" ]; then
+            err "no such file: '${f}'"
+        fi
 
-    tail -n 250 "${f}" | grep -a "!!!PTAG" | awk '{ print $2; }'
+        tail -n 250 "${f}" | grep -a "!!!PTAG" | cut -d" " -f 2-
+    fi
 }
 
 function usage {
@@ -112,8 +116,9 @@ function usage {
     echo "        Remove TAG from FILE."
     echo "    search TAGS..."
     echo "        List all files that have every tag in TAGS."
-    echo "    list FILE"
-    echo "        List all tags applied to FILE."
+    echo "    list [FILE]"
+    echo "        If FILE if it is provided, list all tags applied"
+    echo "        to that file. Otherwise list tags from all files."
     echo "    help"
     echo "        Show this helpful information."
 }
