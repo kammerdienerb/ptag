@@ -64,17 +64,6 @@ function untag {
     fi
 }
 
-function search_file {
-    f="$1"
-    awk_prg="$2"
-    n_tags="$3"
-
-    n=$(awk "${awk_prg}" "${f}")
-    if [ "$n" == "${n_tags}" ]; then
-        printf "${f}\n"
-    fi
-}
-
 function search {
     awk_prg=""
     for tag in "$@"; do
@@ -84,7 +73,7 @@ function search {
     awk_prg+="0 { n++ } END { print n; }"
 
     xargs_template="f=\"\$1\"
-n=\$(tail -n 250 \"\${f}\" | awk '${awk_prg}')
+n=\$(tail -n 250 \"\${f}\" | env LC_ALL='C' awk '${awk_prg}')
 if [ \"\$n\" == \"$#\" ]; then
     echo \"\${f}\"
 fi"
